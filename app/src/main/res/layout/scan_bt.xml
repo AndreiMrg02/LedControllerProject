@@ -3,48 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#E4E3E4"
-    tools:context=".ui.home.HomeFragment">
+    android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/connectToBluetooth"
-        android:layout_width="229dp"
-        android:layout_height="48dp"
-        android:backgroundTint="#009688"
-        android:text="Scan"
+    <ListView
+        android:id="@+id/devicesList"
+        android:layout_width="353dp"
+        android:layout_height="471dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.118"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintVertical_bias="1.0"
+        tools:cacheColorHint="#ED0D0D" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
+        android:id="@+id/guideline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_begin="20dp" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline2"
+        android:id="@+id/guideline4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="20dp" />
-
-    <TextView
-        android:id="@+id/deviceName"
-        android:layout_width="264dp"
-        android:layout_height="54dp"
-        android:layout_marginStart="131dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        android:text="Vedem"
-        android:textSize="34sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
