@@ -1,221 +1,215 @@
 package com.example.ledcontrollerproject.ui.schedule
 
+import android.app.TimePickerDialog
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import java.util.*
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class ScheduleFragment : Fragment() {
-
-/*    private var _binding: FragmentSlideshowBinding? = null
-    private val binding get() = _binding!!
-
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ):  View {
-        val homeViewModel = ViewModelProvider(this).get(SlideshowViewModel::class.java)
-        _binding = FragmentSlideshowBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
-        val scrollView = ScrollView(requireContext())
-        val scrollViewParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        scrollView.layoutParams = scrollViewParams
-
-        val linearLayout = LinearLayout(requireContext())
-        linearLayout.orientation = LinearLayout.VERTICAL
-        linearLayout.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT  // Poate fi WRAP_CONTENT pentru înălțimea dorită
-        )
-
-        val buttonCreateElement = Button(requireContext())
-        buttonCreateElement.text = "Creează Element"
-        linearLayout.addView(buttonCreateElement)
-        buttonCreateElement.setOnClickListener {
-            createNewElement(linearLayout, root)
-        }
-
-        // Adaugă linearLayout în ScrollView
-        scrollView.addView(linearLayout)
-
-        // Adaugă ScrollView în root
-        (root as ViewGroup).addView(scrollView)
-
-        return root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun showTimePickerDialog(textView: TextView) {
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
-
-        val timePickerDialog = TimePickerDialog(
-            requireContext(),
-            TimePickerDialog.OnTimeSetListener { _, selectedHour, selectedMinute ->
-                // Actualizează textul în TextView utilizând dataBinding
-                textView.text = "Ora: $selectedHour:$selectedMinute"
-            },
-            hour,
-            minute,
-            true
-        )
-
-        timePickerDialog.show()
-    }
-
-    private fun toggleDaysLayoutVisibility(layoutDays: LinearLayout) {
-        if (layoutDays.visibility == View.VISIBLE) {
-            layoutDays.visibility = View.GONE
-        } else {
-            layoutDays.visibility = View.VISIBLE
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                MyMenuScreen()
+            }
         }
     }
+}
 
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private fun createNewElement(linearLayout: LinearLayout, root: View) {
-        val textView = TextView(requireContext())
-        textView.text = "Ora: "
-        textView.setOnClickListener {
-            showTimePickerDialog(textView)
-        }
-        linearLayout.addView(textView)
+@Composable
+fun MyMenuScreen() {
+    var menuItems by remember { mutableStateOf(listOf(1)) }
 
-        val editTextComments = EditText(requireContext())
-        editTextComments.hint = "Comentarii"
-        linearLayout.addView(editTextComments)
-
-        val switchToggle = Switch(requireContext())
-        switchToggle.text = "Porneste/Opreste"
-        linearLayout.addView(switchToggle)
-
-        val layoutDays = LinearLayout(requireContext())
-        layoutDays.orientation = LinearLayout.HORIZONTAL
-
-        val buttonExpand = Button(requireContext())
-        buttonExpand.text = "Extinde"
-        layoutDays.visibility = View.GONE
-        buttonExpand.setOnClickListener {
-            toggleDaysLayoutVisibility(layoutDays)
-        }
-        linearLayout.addView(buttonExpand)
-        linearLayout.addView(layoutDays)
-
-        val daysOfWeek = arrayOf("L", "M", "M", "J", "V", "S", "D")
-        for (day in daysOfWeek) {
-            val dayButton = Button(requireContext())
-            dayButton.text = day
-            layoutDays.addView(dayButton)
-        }
-    }*/
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun TimePickerDialogWrapper(
-        onTimeSet: (Int, Int) -> Unit
-    ) {
-        var selectedHour by remember { mutableStateOf(0) }
-        var selectedMinute by remember { mutableStateOf(0) }
-
-        // Utilizăm LaunchedEffect pentru a actualiza textul în TextView
-        LaunchedEffect(selectedHour, selectedMinute) {
-            onTimeSet(selectedHour, selectedMinute)
+    LazyColumn {
+        items(menuItems) {index ->
+            MyMenuContent(
+                index = index - 1,
+                onDeleteClick = {
+                    menuItems = menuItems.filterIndexed { i, _ -> i != it }
+                }
+            )
         }
 
-        // Compose TimePicker
-        TimePicker(
-            modifier = Modifier.padding(16.dp),
-            hour = selectedHour,
-            minute = selectedMinute,
-            onHourChange = { selectedHour = it },
-            onMinuteChange = { selectedMinute = it },
-        )
-    }
-
-    @Composable
-    fun ScheduleScreen() {
-        var amountInput by remember { mutableStateOf("") }
-        var switchChecked by remember { mutableStateOf(false) }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
+        item {
             Button(
-                onClick = { /* Handle button click */ },
+                onClick = {
+                    menuItems = menuItems + (menuItems.size + 1)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                    .padding(16.dp)
             ) {
-                Text("Creează Element")
-            }
-
-            Text(
-                text = "Ora: ",
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .clickable {
-                        showTimePickerDialog()
-                    }
-            )
-
-            TextField(
-                value = amountInput,
-                onValueChange = { amountInput = it },
-                placeholder = { Text("Comentarii") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            )
-
-            Switch(
-                checked = switchChecked,
-                onCheckedChange = { switchChecked = it },
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-            )
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            ) {
-                Button(
-                    onClick = { /* Handle button click */ }
-                ) {
-                    Text("Extinde")
-                }
-
-                // Alte elemente pentru zilele săptămânii
-                val daysOfWeek = arrayOf("L", "M", "M", "J", "V", "S", "D")
-                for (day in daysOfWeek) {
-                    Button(
-                        onClick = { /* Handle button click for each day */ },
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    ) {
-                        Text(day)
-                    }
-                }
+                Text("Adaugă")
             }
         }
     }
+}
+
+
+@Composable
+fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit) {
+    var label by remember { mutableStateOf("Eticheta") }
+    var time by remember { mutableStateOf("12:00") }
+    var daysSelected by remember { mutableStateOf(mutableSetOf<String>()) }
+    var isTimePickerVisible by remember { mutableStateOf(false) }
+    val backgroundColor = Color(0xFFCCADE0);
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .background(backgroundColor)
+            .border(2.dp, Color.Black)
+    ) {
+        TextField(
+            value = label,
+            onValueChange = { label = it },
+            label = { Text("Eticheta") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+
+        TimePickerField(
+            time = time,
+            onTimeSelected = { newTime ->
+                time = newTime
+                isTimePickerVisible = false
+            },
+            isTimePickerVisible = isTimePickerVisible,
+            onTimePickerVisibleChange = { isVisible ->
+                isTimePickerVisible = isVisible
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            for (day in listOf("L", "M", "M", "J", "V", "S", "D")) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
+                    Text(day, fontSize = 16.sp)
+                    Checkbox(
+                        checked = daysSelected.contains(day),
+                        onCheckedChange = {
+                            if (it) {
+                                daysSelected.add(day)
+                            } else {
+                                daysSelected.remove(day)
+                            }
+                        },
+                        modifier = Modifier.padding(4.dp)
+                    )
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        {
+            TextButton(
+                onClick = {
+                    onDeleteClick(index)
+                },
+                modifier = Modifier.padding(4.dp)
+            ) {
+                Text("Stergere")
+            }
+        }
+    }
+}
+
+
+@Composable
+fun TimePickerField(
+    time: String,
+    onTimeSelected: (String) -> Unit,
+    isTimePickerVisible: Boolean,
+    onTimePickerVisibleChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Text(
+            text = "Ora: $time",
+            modifier = Modifier.clickable { onTimePickerVisibleChange(true) },
+            fontSize = 30.sp // Aici am mărit dimensiunea textului
+        )
+
+        if (isTimePickerVisible) {
+            ShowTimePicker(onTimeSelected, onTimePickerVisibleChange)
+        }
+    }
+}
+
+@Composable
+fun ShowTimePicker(
+    onTimeSelected: (String) -> Unit,
+    onTimePickerVisibleChange: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
+
+    DisposableEffect(context) {
+        val calendar = Calendar.getInstance()
+
+        TimePickerDialog(
+            context,
+            { _, hourOfDay, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                calendar.set(Calendar.MINUTE, minute)
+
+                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                val selectedTime = timeFormat.format(calendar.time)
+                onTimeSelected(selectedTime)
+                onTimePickerVisibleChange(false)
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
+
+        onDispose { /* Cleanup, if needed */ }
+    }
+}
