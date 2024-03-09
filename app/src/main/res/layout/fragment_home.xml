@@ -5,41 +5,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E4E3E4"
-    tools:context=".ui.home.HomeFragment">
+    tools:context=".ui.bluetooth.BluetoothFragment">
 
     <Button
         android:id="@+id/connectToBluetooth"
-        android:layout_width="337dp"
-        android:layout_height="140dp"
+        android:layout_width="229dp"
+        android:layout_height="48dp"
         android:backgroundTint="#009688"
-        android:text="Connect to bluetooth"
+        android:text="Scan"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintVertical_bias="0.118"
         tools:ignore="MissingConstraints" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="20dp" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp" />
-
-    <ListView
-        android:id="@+id/devicesListView"
-        android:layout_width="409dp"
-        android:layout_height="293dp"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="437dp" />
+    <TextView
+        android:id="@+id/deviceName"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

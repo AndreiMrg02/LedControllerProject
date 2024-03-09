@@ -1,4 +1,4 @@
-package com.example.ledcontrollerproject.ui.slideshow
+package com.example.ledcontrollerproject.ui.schedule
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

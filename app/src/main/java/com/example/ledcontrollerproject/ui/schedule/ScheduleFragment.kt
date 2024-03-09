@@ -1,25 +1,19 @@
-package com.example.ledcontrollerproject.ui.slideshow
+package com.example.ledcontrollerproject.ui.schedule
 
-import android.annotation.SuppressLint
-import android.app.TimePickerDialog
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.Switch
-import android.widget.TextView
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.example.ledcontrollerproject.databinding.FragmentSlideshowBinding
-import java.util.Calendar
+import java.util.*
 
-class SlideshowFragment : Fragment() {
+class ScheduleFragment : Fragment() {
 
-    private var _binding: FragmentSlideshowBinding? = null
+/*    private var _binding: FragmentSlideshowBinding? = null
     private val binding get() = _binding!!
 
     @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -130,5 +124,98 @@ class SlideshowFragment : Fragment() {
             dayButton.text = day
             layoutDays.addView(dayButton)
         }
+    }*/
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun TimePickerDialogWrapper(
+        onTimeSet: (Int, Int) -> Unit
+    ) {
+        var selectedHour by remember { mutableStateOf(0) }
+        var selectedMinute by remember { mutableStateOf(0) }
+
+        // Utilizăm LaunchedEffect pentru a actualiza textul în TextView
+        LaunchedEffect(selectedHour, selectedMinute) {
+            onTimeSet(selectedHour, selectedMinute)
+        }
+
+        // Compose TimePicker
+        TimePicker(
+            modifier = Modifier.padding(16.dp),
+            hour = selectedHour,
+            minute = selectedMinute,
+            onHourChange = { selectedHour = it },
+            onMinuteChange = { selectedMinute = it },
+        )
     }
-}
+
+    @Composable
+    fun ScheduleScreen() {
+        var amountInput by remember { mutableStateOf("") }
+        var switchChecked by remember { mutableStateOf(false) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Button(
+                onClick = { /* Handle button click */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text("Creează Element")
+            }
+
+            Text(
+                text = "Ora: ",
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .clickable {
+                        showTimePickerDialog()
+                    }
+            )
+
+            TextField(
+                value = amountInput,
+                onValueChange = { amountInput = it },
+                placeholder = { Text("Comentarii") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+
+            Switch(
+                checked = switchChecked,
+                onCheckedChange = { switchChecked = it },
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Button(
+                    onClick = { /* Handle button click */ }
+                ) {
+                    Text("Extinde")
+                }
+
+                // Alte elemente pentru zilele săptămânii
+                val daysOfWeek = arrayOf("L", "M", "M", "J", "V", "S", "D")
+                for (day in daysOfWeek) {
+                    Button(
+                        onClick = { /* Handle button click for each day */ },
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    ) {
+                        Text(day)
+                    }
+                }
+            }
+        }
+    }

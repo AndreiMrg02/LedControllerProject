@@ -1,4 +1,4 @@
-package com.example.ledcontrollerproject.ui.gallery
+package com.example.ledcontrollerproject.ui.stateLed
 
 import android.os.Bundle
 import android.util.Log
