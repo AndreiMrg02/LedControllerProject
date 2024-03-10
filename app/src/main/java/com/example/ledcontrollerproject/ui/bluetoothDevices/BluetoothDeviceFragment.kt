@@ -1,5 +1,6 @@
 package com.example.ledcontrollerproject.ui.bluetoothDevices
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 /**
  * Not used yet
  */
+@SuppressLint("MissingPermission")
 class BluetoothDeviceFragment : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

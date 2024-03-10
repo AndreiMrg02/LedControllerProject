@@ -13,14 +13,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.TextButton
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import com.example.ledcontrollerproject.util.BluetoothScanner
@@ -46,6 +48,7 @@ class BluetoothFragment : Fragment() {
 
     private lateinit var bluetoothScanner: BluetoothScanner
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -63,7 +66,7 @@ class BluetoothFragment : Fragment() {
     @Composable
     fun BluetoothScannerApp(content: @Composable () -> Unit) {
         rememberScaffoldState()
-        MaterialTheme{
+        MaterialTheme {
             Surface {
                 content()
             }
@@ -90,7 +93,9 @@ class BluetoothFragment : Fragment() {
         val coroutineScope = rememberCoroutineScope()
 
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -108,19 +113,74 @@ class BluetoothFragment : Fragment() {
             DeviceList(rec.value)
         }
     }
+
+    /*    @SuppressLint("MissingPermission")
+        @Composable
+        fun DeviceList(devices: List<BluetoothDevice>) {
+            LazyColumn {
+                items(devices) { device ->
+                    if (device.name != null) {
+                        DeviceListItem(device = device)
+                    }
+                }
+            }
+        }*/
+
+    @Composable
+    @SuppressLint("MissingPermission")
+ /*   fun DeviceList(devices: List<BluetoothDevice>, onItemClick: (BluetoothDevice) -> Unit) {
+        LazyColumn {
+            items(devices.filter { it.name != null }) { device ->
+                DeviceListItem(device = device) {
+                    onItemClick(device)
+                }
+            }
+        }
+    }*/
+    fun DeviceList(devices: List<BluetoothDevice>)
+    {
+        LazyColumn {
+            items(devices.filter { it.name != null }) { device ->
+                DeviceListItem(device = device) {
+                }
+            }
+        }
+    }
     @SuppressLint("MissingPermission")
     @Composable
-    fun DeviceList(devices: List<BluetoothDevice>) {
-        LazyColumn {
-            items(devices) { device ->
-                if (device.name != null) {
-                    Text(text = "${device.name} - ${device.address}")
+    fun DeviceListItem(device: BluetoothDevice, onItemClick: () -> Unit) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onItemClick() }
+                .padding(8.dp),
+            shape = CircleShape,
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = device.name ?: "Unknown Device",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
     }
 
-    private fun startInfinityRefreshScanner(handler: Handler, rec: MutableState<List<BluetoothDevice>>) {
+
+    private fun startInfinityRefreshScanner(
+        handler: Handler,
+        rec: MutableState<List<BluetoothDevice>>
+    ) {
         if (!isScanning) {
             val runnable = object : Runnable {
                 @RequiresApi(Build.VERSION_CODES.S)
