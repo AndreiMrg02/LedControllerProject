@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -33,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import com.example.ledcontrollerproject.ui.theme.WoofTheme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -53,27 +55,28 @@ class ScheduleFragment : Fragment() {
 @Composable
 fun MyMenuScreen() {
     var menuItems by remember { mutableStateOf(listOf(1)) }
+    WoofTheme {
+        LazyColumn {
+            items(menuItems) { index ->
+                MyMenuContent(
+                    index = index - 1,
+                    onDeleteClick = {
+                        menuItems = menuItems.filterIndexed { i, _ -> i != it }
+                    }
+                )
+            }
 
-    LazyColumn {
-        items(menuItems) {index ->
-            MyMenuContent(
-                index = index - 1,
-                onDeleteClick = {
-                    menuItems = menuItems.filterIndexed { i, _ -> i != it }
+            item {
+                Button(
+                    onClick = {
+                        menuItems = menuItems + (menuItems.size + 1)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text("Adaugă")
                 }
-            )
-        }
-
-        item {
-            Button(
-                onClick = {
-                    menuItems = menuItems + (menuItems.size + 1)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text("Adaugă")
             }
         }
     }
@@ -87,76 +90,83 @@ fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit) {
     var daysSelected by remember { mutableStateOf(mutableSetOf<String>()) }
     var isTimePickerVisible by remember { mutableStateOf(false) }
     val backgroundColor = Color(0xFFCCADE0);
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .background(backgroundColor)
-            .border(2.dp, Color.Black)
-    ) {
-        TextField(
-            value = label,
-            onValueChange = { label = it },
-            label = { Text("Eticheta") },
+    WoofTheme {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        )
-
-        TimePickerField(
-            time = time,
-            onTimeSelected = { newTime ->
-                time = newTime
-                isTimePickerVisible = false
-            },
-            isTimePickerVisible = isTimePickerVisible,
-            onTimePickerVisibleChange = { isVisible ->
-                isTimePickerVisible = isVisible
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
+                .padding(16.dp)
         ) {
-            for (day in listOf("L", "M", "M", "J", "V", "S", "D")) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
+            TextField(
+                value = label,
+                onValueChange = { label = it },
+                label = { Text("Eticheta") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+
+            TimePickerField(
+                time = time,
+                onTimeSelected = { newTime ->
+                    time = newTime
+                    isTimePickerVisible = false
+                },
+                isTimePickerVisible = isTimePickerVisible,
+                onTimePickerVisibleChange = { isVisible ->
+                    isTimePickerVisible = isVisible
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                for (day in listOf("L", "M", "M", "J", "V", "S", "D")) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Text(day, fontSize = 16.sp)
+                        Checkbox(
+                            checked = daysSelected.contains(day),
+                            onCheckedChange = {
+                                if (it) {
+                                    daysSelected.add(day)
+                                } else {
+                                    daysSelected.remove(day)
+                                }
+                            },
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+            {
+                TextButton(
+                    onClick = {
+                        onDeleteClick(index)
+                    },
+                    modifier = Modifier.padding(4.dp)
                 ) {
-                    Text(day, fontSize = 16.sp)
-                    Checkbox(
-                        checked = daysSelected.contains(day),
-                        onCheckedChange = {
-                            if (it) {
-                                daysSelected.add(day)
-                            } else {
-                                daysSelected.remove(day)
-                            }
-                        },
-                        modifier = Modifier.padding(4.dp)
-                    )
+                    Text("Stergere")
                 }
             }
         }
-
-        Row(
+        
+        Divider(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .background(Color.Gray)
         )
-        {
-            TextButton(
-                onClick = {
-                    onDeleteClick(index)
-                },
-                modifier = Modifier.padding(4.dp)
-            ) {
-                Text("Stergere")
-            }
-        }
     }
 }
 

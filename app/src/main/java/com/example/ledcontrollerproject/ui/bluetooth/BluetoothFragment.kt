@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import com.example.ledcontrollerproject.ui.theme.WoofTheme
 import com.example.ledcontrollerproject.util.BluetoothScanner
 import com.example.ledcontrollerproject.util.CallbackBluetoothScan
 import kotlinx.coroutines.launch
@@ -90,26 +91,27 @@ class BluetoothFragment : Fragment() {
         }
 
         val coroutineScope = rememberCoroutineScope()
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(onClick = {
-                coroutineScope.launch {
-                    rec.value = emptyList() // Clear the list
-                    bluetoothScanner.initRefreshData()
+        WoofTheme {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(onClick = {
+                    coroutineScope.launch {
+                        rec.value = emptyList() // Clear the list
+                        bluetoothScanner.initRefreshData()
+                    }
+                }) {
+                    Text("Start Scan")
                 }
-            }) {
-                Text("Start Scan")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                DeviceList(rec.value)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DeviceList(rec.value)
         }
     }
 
@@ -138,9 +140,11 @@ class BluetoothFragment : Fragment() {
     }*/
     fun DeviceList(devices: List<BluetoothDevice>)
     {
-        LazyColumn {
-            items(devices.filter { it.name != null }) { device ->
-                DeviceListItem(device = device) {
+        WoofTheme {
+            LazyColumn {
+                items(devices.filter { it.name != null }) { device ->
+                    DeviceListItem(device = device) {
+                    }
                 }
             }
         }
