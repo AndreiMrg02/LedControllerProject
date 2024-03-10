@@ -70,7 +70,6 @@ class BluetoothFragment : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("CoroutineCreationDuringComposition")
     @Composable
     fun MainContent() {

@@ -9,9 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 
 interface CallbackBluetoothScan {
     fun permissionsNotGranted(permissions: Array<String>)
@@ -22,7 +20,6 @@ interface CallbackBluetoothScan {
 }
 
 class BluetoothScanner(private val context: Context, private val callbackBluetoothScan: CallbackBluetoothScan) {
-    @RequiresApi(Build.VERSION_CODES.S)
     private val needPermissions = listOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -51,7 +48,6 @@ class BluetoothScanner(private val context: Context, private val callbackBluetoo
         context.registerReceiver(broadcastReceiver, intentFilter)
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     fun initRefreshData(){
         if (bluetoothAdapter != null) {
             val permissions = preparePermissions()
@@ -81,7 +77,6 @@ class BluetoothScanner(private val context: Context, private val callbackBluetoo
         return true
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     private fun preparePermissions(): Boolean{
         if (!checkPermissions()) {
             callbackBluetoothScan.permissionsNotGranted(getNotGrantedPermissions())
@@ -94,12 +89,10 @@ class BluetoothScanner(private val context: Context, private val callbackBluetoo
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     private fun checkPermissions(): Boolean{
         return needPermissions.all { checkPermission(it) }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     private fun getNotGrantedPermissions(): Array<String> {
         return needPermissions.filter { !checkPermission(it) }.toTypedArray()
     }
