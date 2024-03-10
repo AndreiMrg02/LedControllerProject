@@ -171,7 +171,26 @@ class BluetoothFragment : Fragment() {
                         fontWeight = FontWeight.Bold
                     )
                 }
+                Button(onClick = {
+                    initiatePairing(device)
+                }) {
+                    Text("Pair Device")
+                }
             }
+        }
+    }
+    @SuppressLint("MissingPermission")
+    private fun initiatePairing(device: BluetoothDevice) {
+        try {
+            val isBonded = device.createBond()
+            if (isBonded) {
+                Toast.makeText(context, "Pairing successful!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Pairing failed!", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, "Pairing failed! Exception: ${e.message}", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
         }
     }
 
