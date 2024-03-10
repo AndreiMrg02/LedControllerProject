@@ -8,9 +8,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.ListView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
+/**
+ * Not used yet
+ */
 class BluetoothDeviceFragment : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

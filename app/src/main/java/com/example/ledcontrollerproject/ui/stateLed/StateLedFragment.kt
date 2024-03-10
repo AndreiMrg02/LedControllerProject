@@ -28,7 +28,6 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 class StateLedFragment : Fragment() {
 
     private var _binding: StateLedFragment? = null
-    private val binding get() = _binding!!
 
 
     override fun onCreateView(
