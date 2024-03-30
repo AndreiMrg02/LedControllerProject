@@ -34,12 +34,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import com.example.ledcontrollerproject.ui.schedule.data.ScheduleRepository
 import com.example.ledcontrollerproject.ui.theme.WoofTheme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 class ScheduleFragment : Fragment() {
+    var scheduleRepository: ScheduleRepository? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
