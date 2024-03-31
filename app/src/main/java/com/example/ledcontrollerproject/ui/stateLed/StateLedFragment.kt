@@ -32,9 +32,7 @@ class StateLedFragment : Fragment() {
 
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
@@ -54,16 +52,14 @@ class StateLedFragment : Fragment() {
                     .fillMaxSize()
                     .padding(all = 30.dp)
             ) {
-                HsvColorPicker(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(450.dp)
-                        .padding(10.dp),
+                HsvColorPicker(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
+                    .padding(10.dp),
                     controller = controller,
                     onColorChanged = {
                         Log.d("Color", it.hexCode)
-                    }
-                )
+                    })
                 BrightnessSlider(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -72,31 +68,25 @@ class StateLedFragment : Fragment() {
                     controller = controller,
                 )
 
-                // Utilizează Row pentru a alinia butoanele orizontal
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Button(
-                        modifier = Modifier.weight(1f),
+                    Button(modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(colorOn),
                         onClick = {
-                            // Logica pentru primul buton
+                            // Logica pentru butonul de on
                             Log.d("ON", "The led is turn on")
-                        }
-                    ) {
+                        }) {
                         Text("ON")
                     }
-                    Button(
-                        modifier = Modifier.weight(1f),
+                    Button(modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(colorOff),
                         onClick = {
-                            // Logica pentru al doilea buton
                             Log.d("OFF", "The led is turn off")
-                        }
-                    ) {
+                        }) {
                         Text("OFF")
                     }
                 }

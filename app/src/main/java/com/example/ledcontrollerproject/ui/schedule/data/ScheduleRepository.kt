@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-class ScheduleRepository(private val dataStore: DataStore<Preferences>){
+class ScheduleRepository(private val dataStore: DataStore<Preferences>) {
     private val SCHEDULE_ITEMS_KEY = stringPreferencesKey("schedule_items")
 
     // Flow to emit the list of schedule items
@@ -28,7 +28,8 @@ class ScheduleRepository(private val dataStore: DataStore<Preferences>){
         }
         .map { preferences ->
             // Retrieve schedule items from preferences
-            val scheduleItemsJson = preferences[SCHEDULE_ITEMS_KEY] ?: return@map emptyList<ScheduleItem>()
+            val scheduleItemsJson =
+                preferences[SCHEDULE_ITEMS_KEY] ?: return@map emptyList<ScheduleItem>()
             val scheduleItems = Gson().fromJson(scheduleItemsJson, Array<ScheduleItem>::class.java)
             scheduleItems.toList()
         }

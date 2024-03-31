@@ -19,7 +19,10 @@ interface CallbackBluetoothScan {
 
 }
 
-class BluetoothScanner(private val context: Context, private val callbackBluetoothScan: CallbackBluetoothScan) {
+class BluetoothScanner(
+    private val context: Context,
+    private val callbackBluetoothScan: CallbackBluetoothScan
+) {
     private val needPermissions = listOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -29,11 +32,12 @@ class BluetoothScanner(private val context: Context, private val callbackBluetoo
 
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
 
-    private val broadcastReceiver = object: BroadcastReceiver() {
+    private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            when(p1!!.action!!){
+            when (p1!!.action!!) {
                 BluetoothDevice.ACTION_FOUND -> {
-                    val device: BluetoothDevice = p1.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)!!
+                    val device: BluetoothDevice =
+                        p1.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)!!
                     callbackBluetoothScan.deviceFound(device)
                 }
             }
@@ -48,7 +52,7 @@ class BluetoothScanner(private val context: Context, private val callbackBluetoo
         context.registerReceiver(broadcastReceiver, intentFilter)
     }
 
-    fun initRefreshData(){
+    fun initRefreshData() {
         if (bluetoothAdapter != null) {
             val permissions = preparePermissions()
             if (permissions) {
@@ -57,27 +61,27 @@ class BluetoothScanner(private val context: Context, private val callbackBluetoo
                     refreshData()
                 }
             }
-        }else{
+        } else {
             callbackBluetoothScan.deviceNotSupportBluetooth()
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun refreshData(){
+    private fun refreshData() {
         bluetoothAdapter!!.cancelDiscovery();
         val res = bluetoothAdapter.startDiscovery()
         Log.w("Scanning", res.toString())
     }
 
-    private fun prepareBluetoothModule(): Boolean{
-        if (bluetoothAdapter?.isEnabled == false){
+    private fun prepareBluetoothModule(): Boolean {
+        if (bluetoothAdapter?.isEnabled == false) {
             callbackBluetoothScan.bluetoothNotEnable()
             return false
         }
         return true
     }
 
-    private fun preparePermissions(): Boolean{
+    private fun preparePermissions(): Boolean {
         if (!checkPermissions()) {
             callbackBluetoothScan.permissionsNotGranted(getNotGrantedPermissions())
             return false
@@ -85,11 +89,11 @@ class BluetoothScanner(private val context: Context, private val callbackBluetoo
         return true
     }
 
-    private fun checkPermission(permission: String): Boolean{
+    private fun checkPermission(permission: String): Boolean {
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun checkPermissions(): Boolean{
+    private fun checkPermissions(): Boolean {
         return needPermissions.all { checkPermission(it) }
     }
 
@@ -98,12 +102,12 @@ class BluetoothScanner(private val context: Context, private val callbackBluetoo
     }
 
     @SuppressLint("MissingPermission")
-    fun stopScan(){
+    fun stopScan() {
         bluetoothAdapter?.cancelDiscovery()
     }
 
     @SuppressLint("MissingPermission")
-    fun onDestroy(){
+    fun onDestroy() {
         bluetoothAdapter?.cancelDiscovery()
     }
 

@@ -22,7 +22,7 @@ private const val TAG = "BluetoothService"
 private const val MESSAGE_TOAST = 1
 private const val MESSAGE_WRITE = 2
 
-class BluetoothConnect(private val handler: Handler, context: Context){
+class BluetoothConnect(private val handler: Handler, context: Context) {
     private lateinit var classicSocket: BluetoothSocket
     private var outputStream: OutputStream? = null
     private val mmBuffer: ByteArray = ByteArray(1024)
@@ -30,15 +30,16 @@ class BluetoothConnect(private val handler: Handler, context: Context){
     fun BluetoothGattCharacteristic.isReadable(): Boolean =
         containsProperty(BluetoothGattCharacteristic.PROPERTY_READ)
 
-    fun BluetoothGattCharacteristic.isWritable(): Boolean =
+    private fun BluetoothGattCharacteristic.isWritable(): Boolean =
         containsProperty(BluetoothGattCharacteristic.PROPERTY_WRITE)
 
-    fun BluetoothGattCharacteristic.isWritableWithoutResponse(): Boolean =
+    private fun BluetoothGattCharacteristic.isWritableWithoutResponse(): Boolean =
         containsProperty(BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)
 
-    fun BluetoothGattCharacteristic.containsProperty(property: Int): Boolean {
+    private fun BluetoothGattCharacteristic.containsProperty(property: Int): Boolean {
         return properties and property != 0
     }
+
     private val gattCallback = object : BluetoothGattCallback() {
         @SuppressLint("MissingPermission")
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
@@ -46,23 +47,22 @@ class BluetoothConnect(private val handler: Handler, context: Context){
             if (newState == BluetoothGatt.STATE_CONNECTED) {
                 leGatt?.requestMtu(512);
             } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                Log.d(TAG, "Deconectat de la dispozitiv BLE")
+                Log.d(TAG, "Disconnected from ble BLE device")
             }
         }
 
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             super.onServicesDiscovered(gatt, status)
-            if(status == BluetoothGatt.GATT_SUCCESS){
+            if (status == BluetoothGatt.GATT_SUCCESS) {
                 val gattServices: List<BluetoothGattService> = gatt.getServices()
                 Log.e("onServicesDiscovered", "Services count: " + gattServices.size)
 
                 for (gattService in gattServices) {
                     val serviceUUID = gattService.uuid.toString()
-                    if (serviceUUID == "0000ffe0-0000-1000-8000-00805f9b34fb")
-                    {
+                    if (serviceUUID == "0000ffe0-0000-1000-8000-00805f9b34fb") {
                         Log.e("onServicesDiscovered", "Service uuid $serviceUUID")
-                        for (characteristic in gattService.characteristics){
+                        for (characteristic in gattService.characteristics) {
                             val characteristicUUID = characteristic.uuid.toString()
                             characteristic.writeType
                             val properties = characteristic.properties
@@ -70,8 +70,12 @@ class BluetoothConnect(private val handler: Handler, context: Context){
                                 val r = Random().nextInt(255)
                                 val g = Random().nextInt(255)
                                 val b = Random().nextInt(255)
-                                val message =   r.toString() + "," + g.toString() + "," + b.toString() + '\n'
-                                Log.e("onFoundWriteService", "Found write uuid $serviceUUID $characteristicUUID")
+                                val message =
+                                    r.toString() + "," + g.toString() + "," + b.toString() + '\n'
+                                Log.e(
+                                    "onFoundWriteService",
+                                    "Found write uuid $serviceUUID $characteristicUUID"
+                                )
                                 write(message.toByteArray(), characteristic)
                                 break;
                             }
@@ -83,20 +87,22 @@ class BluetoothConnect(private val handler: Handler, context: Context){
             }
 
         }
+
         @SuppressLint("MissingPermission")
         override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
             super.onMtuChanged(gatt, mtu, status)
-            if(status == BluetoothGatt.GATT_SUCCESS) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.e("onMTU", "MTU Good")
                 leGatt?.discoverServices()
             }
         }
 
-        override fun onCharacteristicWrite(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status:Int){
-            if (status == BluetoothGatt.GATT_SUCCESS){
+        override fun onCharacteristicWrite(
+            gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int
+        ) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.e("Write", "Write Success")
-            }
-            else{
+            } else {
                 Log.e("Write", "No Good")
             }
         }
@@ -107,7 +113,7 @@ class BluetoothConnect(private val handler: Handler, context: Context){
     fun connectDevice(device: BluetoothDevice, uuid: UUID, context: Context) {
         BluetoothAdapter.getDefaultAdapter()?.cancelDiscovery()
         leGatt = null;
-        classicSocket =  device.createInsecureRfcommSocketToServiceRecord(uuid);
+        classicSocket = device.createInsecureRfcommSocketToServiceRecord(uuid);
         if (device.type == BluetoothDevice.DEVICE_TYPE_CLASSIC) {
             classicSocket = device.createInsecureRfcommSocketToServiceRecord(uuid)
             try {
@@ -122,11 +128,11 @@ class BluetoothConnect(private val handler: Handler, context: Context){
             }
         } else if (device.type == BluetoothDevice.DEVICE_TYPE_LE) {
             leGatt = device.connectGatt(context, false, gattCallback)
-            Log.d(TAG, "Dispozitivul este de tip Bluetooth Low Energy (LE)")
+            Log.d(TAG, "The device is Bluetooth Low Energy (LE) type ")
             return
         } else {
             // Tip de dispozitiv necunoscut sau alt tip de dispozitiv Bluetooth
-            Log.d(TAG, "Tip de dispozitiv necunoscut sau alt tip de dispozitiv Bluetooth")
+            Log.d(TAG, "Unknown device type or unknown bluetooth device type")
             return
         }
     }
@@ -142,6 +148,7 @@ class BluetoothConnect(private val handler: Handler, context: Context){
                     characteristic.isWritableWithoutResponse() -> {
                         BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
                     }
+
                     else -> error("Characteristic ${characteristic.uuid} cannot be written to")
                 }
 

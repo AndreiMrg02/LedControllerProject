@@ -1,8 +1,8 @@
 package com.example.ledcontrollerproject.ui.bluetooth
-import BluetoothConnect
-import android.app.AlertDialog
 
+import BluetoothConnect
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.bluetooth.BluetoothAdapter
@@ -54,7 +54,7 @@ class BluetoothFragment : Fragment() {
     private val ID_BLUETOOTH = 101
     private val ID_ENABLE_BLUETOOTH = 102
 
-    private val INTERVAL_REFRESH_DATA_SCANNER_MS: Long = 60 * 1000 // minutes
+    private val INTERVAL_REFRESH_DATA_SCANNER_MS: Long = 60 * 1000
 
     private lateinit var bluetoothScanner: BluetoothScanner
     private var DONE: Boolean = false
@@ -62,8 +62,7 @@ class BluetoothFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val context = requireContext()
         return ComposeView(context).apply {
@@ -93,7 +92,6 @@ class BluetoothFragment : Fragment() {
         val rec = remember { mutableStateOf<List<BluetoothDevice>>(emptyList()) }
         val handler = Handler()
 
-        // Start scanning on launch
         initScan(context, rec)
         DisposableEffect(Unit) {
             startInfinityRefreshScanner(handler, rec)
@@ -113,7 +111,7 @@ class BluetoothFragment : Fragment() {
             ) {
                 Button(onClick = {
                     coroutineScope.launch {
-                        rec.value = emptyList() // Clear the list
+                        rec.value = emptyList()
                         bluetoothScanner.initRefreshData()
                     }
                 }) {
@@ -130,17 +128,16 @@ class BluetoothFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Composable
     @SuppressLint("MissingPermission")
-    fun DeviceList(devices: List<BluetoothDevice>)
-    {
+    fun DeviceList(devices: List<BluetoothDevice>) {
         WoofTheme {
             LazyColumn {
                 items(devices.filter { it.name != null }) { device ->
-                    DeviceListItem(device = device) {
-                    }
+                    DeviceListItem(device = device) {}
                 }
             }
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("MissingPermission")
     @Composable
@@ -160,12 +157,10 @@ class BluetoothFragment : Fragment() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start
+                    modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = device.name ?: "Unknown Device",
-                        fontWeight = FontWeight.Bold
+                        text = device.name ?: "Unknown Device", fontWeight = FontWeight.Bold
                     )
                 }
                 Button(onClick = {
@@ -176,6 +171,7 @@ class BluetoothFragment : Fragment() {
             }
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("MissingPermission")
     private fun initiatePairing(device: BluetoothDevice) {
@@ -193,7 +189,7 @@ class BluetoothFragment : Fragment() {
                 val name = device.name
                 val title = "Conexiune realizată cu $name"
                 val content = "Conexiunea Bluetooth s-a realizat cu succes."
-                context?.let { sendConnectionNotification(it, title, content) } // Trimitem notificarea de conexiune realizată
+                context?.let { sendConnectionNotification(it, title, content) }
                 Toast.makeText(context, "Pairing successful!", Toast.LENGTH_SHORT).show()
             } else {
                 val name = device.name
@@ -215,28 +211,24 @@ class BluetoothFragment : Fragment() {
         val clip = ClipData.newPlainText("Error Message", errorMessage)
         clipboard.setPrimaryClip(clip)
 
-        AlertDialog.Builder(context)
-            .setTitle("Error")
-            .setMessage(errorMessage)
+        AlertDialog.Builder(context).setTitle("Error").setMessage(errorMessage)
             .setPositiveButton("Copy") { dialog, _ ->
                 dialog.dismiss()
-                Toast.makeText(context, "Error message copied to clipboard", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Dismiss") { dialog, _ ->
+                Toast.makeText(context, "Error message copied to clipboard", Toast.LENGTH_SHORT)
+                    .show()
+            }.setNegativeButton("Dismiss") { dialog, _ ->
                 dialog.dismiss()
-            }
-            .show()
+            }.show()
     }
 
     private fun startInfinityRefreshScanner(
-        handler: Handler,
-        rec: MutableState<List<BluetoothDevice>>
+        handler: Handler, rec: MutableState<List<BluetoothDevice>>
     ) {
         if (!isScanning) {
             val runnable = object : Runnable {
                 @RequiresApi(Build.VERSION_CODES.S)
                 override fun run() {
-                    rec.value = emptyList() // Clear the list
+                    rec.value = emptyList()
                     bluetoothScanner.initRefreshData()
                     handler.postDelayed(this, INTERVAL_REFRESH_DATA_SCANNER_MS)
                 }
@@ -278,31 +270,23 @@ class BluetoothFragment : Fragment() {
         isScanning = false
     }
 
-    // Funcția pentru a trimite notificarea
-    private fun sendConnectionNotification(context: Context, title:String, content:String) {
+    private fun sendConnectionNotification(context: Context, title: String, content: String) {
         val channelId = "bluetooth_connection_channel"
-        val notificationId = 101 // Alegeți un ID unic pentru notificare
+        val notificationId = 101
 
-        val notificationBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.img_2)
-            .setContentTitle(title)
-            .setContentText(content)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        val notificationBuilder =
+            NotificationCompat.Builder(context, channelId).setSmallIcon(R.drawable.img_2)
+                .setContentTitle(title).setContentText(content)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // Verificăm și cream canalul de notificare, necesar doar pentru Android Oreo și versiuni ulterioare
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                channelId,
-                "Bluetooth Connection",
-                NotificationManager.IMPORTANCE_DEFAULT
+                channelId, "Bluetooth Connection", NotificationManager.IMPORTANCE_DEFAULT
             )
             notificationManager.createNotificationChannel(channel)
         }
-
-        // Trimitem notificarea
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
 }

@@ -162,7 +162,7 @@ fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit) {
                 }
             }
         }
-        
+
         Divider(
             modifier = Modifier
                 .fillMaxWidth()
@@ -187,7 +187,7 @@ fun TimePickerField(
         Text(
             text = "Ora: $time",
             modifier = Modifier.clickable { onTimePickerVisibleChange(true) },
-            fontSize = 30.sp // Aici am mărit dimensiunea textului
+            fontSize = 30.sp
         )
 
         if (isTimePickerVisible) {
