@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import com.example.ledcontrollerproject.ui.schedule.data.ScheduleItem
 import com.example.ledcontrollerproject.ui.schedule.data.ScheduleRepository
 import com.example.ledcontrollerproject.ui.theme.WoofTheme
 import java.text.SimpleDateFormat
@@ -41,21 +42,26 @@ import java.util.Calendar
 import java.util.Locale
 
 class ScheduleFragment : Fragment() {
-    var scheduleRepository: ScheduleRepository? = null
+    private lateinit var scheduleRepository: ScheduleRepository
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        scheduleRepository = ScheduleRepository(requireContext())
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MyMenuScreen()
+                MyMenuScreen(scheduleRepository)
             }
         }
     }
 }
 
 @Composable
-fun MyMenuScreen() {
+fun MyMenuScreen(scheduleRepository: ScheduleRepository) {
     var menuItems by remember { mutableStateOf(listOf(1)) }
     WoofTheme {
         LazyColumn {
@@ -64,7 +70,8 @@ fun MyMenuScreen() {
                     index = index - 1,
                     onDeleteClick = {
                         menuItems = menuItems.filterIndexed { i, _ -> i != it }
-                    }
+                    },
+                    scheduleRepository = scheduleRepository
                 )
             }
 
@@ -86,12 +93,27 @@ fun MyMenuScreen() {
 
 
 @Composable
-fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit) {
+fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit, scheduleRepository: ScheduleRepository) {
     var label by remember { mutableStateOf("Eticheta") }
     var time by remember { mutableStateOf("12:00") }
     var daysSelected by remember { mutableStateOf(mutableSetOf<String>()) }
     var isTimePickerVisible by remember { mutableStateOf(false) }
     val backgroundColor = Color(0xFFCCADE0);
+
+    LaunchedEffect(Unit) {
+        scheduleRepository.menuItemDataFlow.collect { menuItemData ->
+            if (menuItemData != null) {
+                label = menuItemData.label
+                time = menuItemData.time
+                daysSelected = menuItemData.daysSelected.toMutableSet()
+            }
+        }
+    }
+
+    LaunchedEffect(label, time, daysSelected) {
+        scheduleRepository.saveMenuItemData(ScheduleItem(label, time, daysSelected))
+    }
+
     WoofTheme {
         Column(
             modifier = Modifier
