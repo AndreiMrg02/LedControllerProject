@@ -1,5 +1,6 @@
 package com.example.ledcontrollerproject.ui.schedule
 
+import android.annotation.SuppressLint
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -41,6 +42,7 @@ import com.example.ledcontrollerproject.ui.schedule.data.ScheduleItem
 import com.example.ledcontrollerproject.ui.schedule.data.ScheduleItemIdGenerator
 import com.example.ledcontrollerproject.ui.schedule.data.ScheduleRepository
 import com.example.ledcontrollerproject.ui.theme.WoofTheme
+import com.example.ledcontrollerproject.util.AlarmNotify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -50,11 +52,13 @@ import java.util.Locale
 class ScheduleFragment : Fragment() {
     private lateinit var scheduleRepository: ScheduleRepository
     private var menuItems by mutableStateOf(emptyList<ScheduleItem>())
-
+    private val alarmNotify = AlarmNotify()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         scheduleRepository = ScheduleRepository(requireContext())
         ScheduleItemIdGenerator.initialize(requireContext())
+
+        alarmNotify.scheduleAlarmCheck(requireContext(), scheduleRepository)
     }
 
     override fun onCreateView(
@@ -120,6 +124,7 @@ fun MyMenuScreen(scheduleRepository: ScheduleRepository, viewModelScope: Corouti
     }
 }
 
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun MyMenuContent(
     scheduleItem: ScheduleItem,
@@ -179,7 +184,7 @@ fun MyMenuContent(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                for (day in listOf("L", "M", "M", "J", "V", "S", "D")) {
+                for (day in listOf("L", "Ma", "Mi", "J", "V", "S", "D")) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
@@ -188,13 +193,13 @@ fun MyMenuContent(
                         Text(day, fontSize = 16.sp)
                         Checkbox(
                             checked = daysSelected.contains(day),
-                            onCheckedChange = {
-                                if (it) {
+                            onCheckedChange = { isChecked ->
+                                if (isChecked) {
                                     daysSelected.add(day)
                                 } else {
                                     daysSelected.remove(day)
                                 }
-                                val updatedItem = ScheduleItem(label, time, daysSelected.toList())
+                                val updatedItem = scheduleItem.copy(daysSelected = daysSelected.toList())
                                 onUpdateClick(updatedItem)
                             },
                             modifier = Modifier.padding(4.dp)
@@ -281,3 +286,4 @@ fun ShowTimePicker(
         onDispose { /* Cleanup, if needed */ }
     }
 }
+

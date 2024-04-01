@@ -53,4 +53,8 @@ class ScheduleRepository(private val context: Context) {
     private object PreferencesKeys {
         val MENU_ITEMS = stringPreferencesKey("menu_items")
     }
+
+    suspend fun getMenuItemData(): List<ScheduleItem> {
+        return menuItemDataFlow.firstOrNull() ?: emptyList()
+    }
 }
