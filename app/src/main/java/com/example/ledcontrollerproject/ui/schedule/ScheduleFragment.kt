@@ -22,9 +22,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,18 +36,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.ledcontrollerproject.ui.schedule.data.ScheduleItem
+import com.example.ledcontrollerproject.ui.schedule.data.ScheduleItemIdGenerator
 import com.example.ledcontrollerproject.ui.schedule.data.ScheduleRepository
 import com.example.ledcontrollerproject.ui.theme.WoofTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 class ScheduleFragment : Fragment() {
     private lateinit var scheduleRepository: ScheduleRepository
+    private var menuItems by mutableStateOf(emptyList<ScheduleItem>())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         scheduleRepository = ScheduleRepository(requireContext())
+        ScheduleItemIdGenerator.initialize(requireContext())
     }
 
     override fun onCreateView(
@@ -54,32 +63,52 @@ class ScheduleFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                MyMenuScreen(scheduleRepository)
+                val coroutineScope = rememberCoroutineScope()
+                MyMenuScreen(scheduleRepository, coroutineScope)
             }
+        }
+    }
+
+    private fun saveMenuItems() {
+        lifecycleScope.launch {
+            scheduleRepository.saveMenuItemData(menuItems)
         }
     }
 }
 
 @Composable
-fun MyMenuScreen(scheduleRepository: ScheduleRepository) {
-    var menuItems by remember { mutableStateOf(listOf(1)) }
+fun MyMenuScreen(scheduleRepository: ScheduleRepository, viewModelScope: CoroutineScope) {
+    val menuItems by scheduleRepository.menuItemDataFlow.collectAsState(initial = emptyList())
     WoofTheme {
         LazyColumn {
-            items(menuItems) { index ->
+            items(menuItems) { scheduleItem ->
                 MyMenuContent(
-                    index = index - 1,
-                    onDeleteClick = {
-                        menuItems = menuItems.filterIndexed { i, _ -> i != it }
+                    scheduleItem = scheduleItem,
+                    onDeleteClick = { item ->
+                        viewModelScope.launch {
+                            scheduleRepository.removeMenuItem(item)
+                        }
                     },
-                    scheduleRepository = scheduleRepository
+                    onUpdateClick = { newItem ->
+                        viewModelScope.launch {
+                            scheduleRepository.updateMenuItem(newItem)
+                        }
+                    }
                 )
             }
 
             item {
                 Button(
                     onClick = {
-                        menuItems = menuItems + (menuItems.size + 1)
-                    },
+                        viewModelScope.launch {
+                        // Adăugați un element nou
+                            scheduleRepository.addMenuItem(ScheduleItem(
+                                label = "Etichetă implicită",
+                                time = "12:00",
+                                daysSelected = emptyList()
+                            ))
+                                }
+                              },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
@@ -91,27 +120,22 @@ fun MyMenuScreen(scheduleRepository: ScheduleRepository) {
     }
 }
 
-
 @Composable
-fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit, scheduleRepository: ScheduleRepository) {
-    var label by remember { mutableStateOf("Eticheta") }
-    var time by remember { mutableStateOf("12:00") }
-    var daysSelected by remember { mutableStateOf(mutableSetOf<String>()) }
+fun MyMenuContent(
+    scheduleItem: ScheduleItem,
+    onDeleteClick: (ScheduleItem) -> Unit,
+    onUpdateClick: (ScheduleItem) -> Unit
+) {
+    var label by remember { mutableStateOf(scheduleItem.label) }
+    var time by remember { mutableStateOf(scheduleItem.time) }
+    var daysSelected by remember { mutableStateOf(scheduleItem.daysSelected.toMutableSet()) }
     var isTimePickerVisible by remember { mutableStateOf(false) }
     val backgroundColor = Color(0xFFCCADE0);
 
-    LaunchedEffect(Unit) {
-        scheduleRepository.menuItemDataFlow.collect { menuItemData ->
-            if (menuItemData != null) {
-                label = menuItemData.label
-                time = menuItemData.time
-                daysSelected = menuItemData.daysSelected.toMutableSet()
-            }
-        }
-    }
-
-    LaunchedEffect(label, time, daysSelected) {
-        scheduleRepository.saveMenuItemData(ScheduleItem(label, time, daysSelected))
+    LaunchedEffect(scheduleItem) {
+        label = scheduleItem.label
+        time = scheduleItem.time
+        daysSelected = scheduleItem.daysSelected.toMutableSet()
     }
 
     WoofTheme {
@@ -121,7 +145,12 @@ fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit, scheduleRepository: 
         ) {
             TextField(
                 value = label,
-                onValueChange = { label = it },
+                onValueChange = {
+                    label = it
+                    // Update menuItem when label changes
+                    val updatedItem = scheduleItem.copy(label = it)
+                    onUpdateClick(updatedItem)
+                },
                 label = { Text("Eticheta") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,8 +159,11 @@ fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit, scheduleRepository: 
 
             TimePickerField(
                 time = time,
-                onTimeSelected = { newTime ->
-                    time = newTime
+                onTimeSelected = {
+                    time = it
+                    // Update menuItem when time changes
+                    val updatedItem = scheduleItem.copy(time = it)
+                    onUpdateClick(updatedItem)
                     isTimePickerVisible = false
                 },
                 isTimePickerVisible = isTimePickerVisible,
@@ -162,6 +194,8 @@ fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit, scheduleRepository: 
                                 } else {
                                     daysSelected.remove(day)
                                 }
+                                val updatedItem = ScheduleItem(label, time, daysSelected.toList())
+                                onUpdateClick(updatedItem)
                             },
                             modifier = Modifier.padding(4.dp)
                         )
@@ -176,7 +210,7 @@ fun MyMenuContent(index: Int, onDeleteClick: (Int) -> Unit, scheduleRepository: 
             {
                 TextButton(
                     onClick = {
-                        onDeleteClick(index)
+                        onDeleteClick(scheduleItem)
                     },
                     modifier = Modifier.padding(4.dp)
                 ) {
