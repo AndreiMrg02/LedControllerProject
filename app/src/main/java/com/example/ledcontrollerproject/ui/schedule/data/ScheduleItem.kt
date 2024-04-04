@@ -30,7 +30,8 @@ data class ScheduleItem(
     val id: Int,
     val label: String,
     val time: String,
-    val daysSelected: List<String>
+    val daysSelected: List<String>,
+    val switchState: Boolean
 ) {
-    constructor(label: String, time: String, daysSelected: List<String>) : this(ScheduleItemIdGenerator.nextId(), label, time, daysSelected)
+    constructor(label: String, time: String, daysSelected: List<String>, switchState: Boolean) : this(ScheduleItemIdGenerator.nextId(), label, time, daysSelected, switchState)
 }

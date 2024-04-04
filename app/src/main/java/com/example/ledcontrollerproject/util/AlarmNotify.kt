@@ -6,9 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.ledcontrollerproject.MainActivity
 import com.example.ledcontrollerproject.R
+import com.example.ledcontrollerproject.ui.bluetooth.BluetoothFragment
 import com.example.ledcontrollerproject.ui.schedule.data.ScheduleItem
 import com.example.ledcontrollerproject.ui.schedule.data.ScheduleRepository
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -36,6 +38,7 @@ class AlarmNotify {
     }
 
     // Funcție pentru programarea task-ului de verificare a alarmelor
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @OptIn(DelicateCoroutinesApi::class)
     fun scheduleAlarmCheck(context: Context, scheduleRepository: ScheduleRepository) {
         createNotificationChannel(context)
@@ -62,13 +65,31 @@ class AlarmNotify {
                         if (currentTime.get(Calendar.HOUR_OF_DAY) == alarmHour &&
                             currentTime.get(Calendar.MINUTE) == alarmMinute - 1
                         ) {
-                            // Emite notificare cu un minut înainte de activare
                             showNotification(context, scheduleItem)
+                        }
+                        else if (currentTime.get(Calendar.HOUR_OF_DAY) == alarmHour &&
+                            currentTime.get(Calendar.MINUTE) == alarmMinute) {
+                            if (scheduleItem.switchState == true){
+                                val rgb = "255, 255, 255"
+                                context.let { it1 ->
+                                    BluetoothFragment.sendDataToBluetoothDevice(rgb,
+                                        it1
+                                    )
+                                }
+                            }
+                            else{
+                                val rgb = "0, 0, 0"
+                                context.let { it1 ->
+                                    BluetoothFragment.sendDataToBluetoothDevice(rgb,
+                                        it1
+                                    )
+                                }
+                            }
                         }
                     }
                 }
                 Log.d("Alarm", "Am trecut printr-un ciclu de verificare")
-                delay(60000) // Așteaptă un minut înainte de a verifica din nou
+                delay(60000)
             }
         }
     }
@@ -87,7 +108,6 @@ class AlarmNotify {
         }
     }
 
-    // Funcție pentru afișarea notificării
     private fun showNotification(context: Context, scheduleItem: ScheduleItem) {
         val intent = Intent(context, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

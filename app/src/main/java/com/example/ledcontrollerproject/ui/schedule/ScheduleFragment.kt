@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -105,11 +106,11 @@ fun MyMenuScreen(scheduleRepository: ScheduleRepository, viewModelScope: Corouti
                 Button(
                     onClick = {
                         viewModelScope.launch {
-                        // Adăugați un element nou
                             scheduleRepository.addMenuItem(ScheduleItem(
                                 label = "Etichetă implicită",
                                 time = "12:00",
-                                daysSelected = emptyList()
+                                daysSelected = emptyList(),
+                                switchState = true
                             ))
                                 }
                               },
@@ -136,11 +137,12 @@ fun MyMenuContent(
     var daysSelected by remember { mutableStateOf(scheduleItem.daysSelected.toMutableSet()) }
     var isTimePickerVisible by remember { mutableStateOf(false) }
     val backgroundColor = Color(0xFFCCADE0);
-
+    var switchState by remember { mutableStateOf(scheduleItem.switchState)}
     LaunchedEffect(scheduleItem) {
         label = scheduleItem.label
         time = scheduleItem.time
         daysSelected = scheduleItem.daysSelected.toMutableSet()
+        switchState = scheduleItem.switchState
     }
 
     WoofTheme {
@@ -206,6 +208,24 @@ fun MyMenuContent(
                         )
                     }
                 }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Pornire: ")
+                Switch(
+                    checked = switchState,
+                    onCheckedChange = {
+                        switchState = it
+                        val updatedItem = scheduleItem.copy(switchState = it)
+                        onUpdateClick(updatedItem)
+                    },
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
 
             Row(
