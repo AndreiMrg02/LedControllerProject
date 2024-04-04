@@ -96,8 +96,8 @@ class AlarmNotify {
 
         val builder = NotificationCompat.Builder(context, "alarm_channel")
             .setSmallIcon(R.drawable.img_2)
-            .setContentTitle("Alarmă")
-            .setContentText("Alarmă cu eticheta ${scheduleItem.label} va porni într-un minut.")
+            .setContentTitle("Alarma")
+            .setContentText("Alarma cu eticheta ${scheduleItem.label} va porni intr-un minut.")
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)

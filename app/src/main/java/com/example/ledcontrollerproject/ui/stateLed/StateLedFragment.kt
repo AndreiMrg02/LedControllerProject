@@ -1,10 +1,12 @@
 package com.example.ledcontrollerproject.ui.stateLed
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import com.example.ledcontrollerproject.R
+import com.example.ledcontrollerproject.ui.bluetooth.BluetoothFragment
 import com.example.ledcontrollerproject.ui.theme.WoofTheme
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
@@ -30,7 +34,7 @@ class StateLedFragment : Fragment() {
 
     private var _binding: StateLedFragment? = null
 
-
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -41,6 +45,7 @@ class StateLedFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Composable
     fun ColorPicker() {
         val controller = rememberColorPickerController()
@@ -58,16 +63,15 @@ class StateLedFragment : Fragment() {
                     .padding(10.dp),
                     controller = controller,
                     onColorChanged = {
-                        Log.d("Color", it.hexCode)
-                    })
-                BrightnessSlider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .height(35.dp),
-                    controller = controller,
-                )
+                        val rgb = "${(it.color.red * 255).toInt()},${(it.color.green * 255).toInt()},${(it.color.blue * 255).toInt()}" + '\n'
+                        Log.d("Color", rgb)
+                        context?.let { it1 ->
+                            BluetoothFragment.sendDataToBluetoothDevice(rgb,
+                                it1
+                            )
+                        }
 
+                    })
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -77,7 +81,12 @@ class StateLedFragment : Fragment() {
                     Button(modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(colorOn),
                         onClick = {
-                            // Logica pentru butonul de on
+                            val rgb = "255, 255, 255"
+                            context?.let { it1 ->
+                                BluetoothFragment.sendDataToBluetoothDevice(rgb,
+                                    it1
+                                )
+                            }
                             Log.d("ON", "The led is turn on")
                         }) {
                         Text("ON")
@@ -85,7 +94,12 @@ class StateLedFragment : Fragment() {
                     Button(modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(colorOff),
                         onClick = {
-                            Log.d("OFF", "The led is turn off")
+                            val rgb = "0, 0, 0"
+                            context?.let { it1 ->
+                                BluetoothFragment.sendDataToBluetoothDevice(rgb,
+                                    it1
+                                )
+                            }
                         }) {
                         Text("OFF")
                     }

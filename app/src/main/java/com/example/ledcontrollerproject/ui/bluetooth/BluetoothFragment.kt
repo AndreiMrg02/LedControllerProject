@@ -46,19 +46,37 @@ import com.example.ledcontrollerproject.ui.theme.WoofTheme
 import com.example.ledcontrollerproject.util.BluetoothScanner
 import com.example.ledcontrollerproject.util.CallbackBluetoothScan
 import kotlinx.coroutines.launch
+import java.util.Random
 import java.util.UUID
 
-
 class BluetoothFragment : Fragment() {
-    private var isScanning: Boolean = false
-    private val ID_BLUETOOTH = 101
-    private val ID_ENABLE_BLUETOOTH = 102
+    companion object {
+        private var isScanning: Boolean = false
+        private const val ID_BLUETOOTH = 101
+        private const val ID_ENABLE_BLUETOOTH = 102
+        private const val INTERVAL_REFRESH_DATA_SCANNER_MS: Long = 60 * 1000
+        private lateinit var bluetoothService: BluetoothConnect
+        private lateinit var bondedDevice: BluetoothDevice
 
-    private val INTERVAL_REFRESH_DATA_SCANNER_MS: Long = 60 * 1000
+
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        @SuppressLint("MissingPermission")
+        fun sendDataToBluetoothDevice(rgb: String, context: Context) {
+            bluetoothService = BluetoothConnect(Handler(Looper.getMainLooper()))
+            val uuid = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb")
+
+            if (bluetoothService != null && bondedDevice != null) {
+                bluetoothService.connectDevice(bondedDevice, uuid, context)
+
+                val rgbSpace = rgb.takeWhile { it != '\n' }
+                bluetoothService.message = rgbSpace.toByteArray()
+            } else {
+                Toast.makeText(context, "Dispozitivul nu este conectat", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     private lateinit var bluetoothScanner: BluetoothScanner
-    private var DONE: Boolean = false
-
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
@@ -172,24 +190,33 @@ class BluetoothFragment : Fragment() {
         }
     }
 
+
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("MissingPermission")
     private fun initiatePairing(device: BluetoothDevice) {
         try {
             val isBonded = device.createBond()
             if (isBonded) {
-                val bluetoothService =
-                    context?.let { BluetoothConnect(Handler(Looper.getMainLooper()), it) }
+                bluetoothService =
+                    context?.let { BluetoothConnect(Handler(Looper.getMainLooper())) }!!
                 val uuid = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb")
                 context?.let {
                     if (bluetoothService != null) {
                         bluetoothService.connectDevice(device, uuid, it)
                     }
                 }
+                bondedDevice = device
                 val name = device.name
                 val title = "Conexiune realizată cu $name"
                 val content = "Conexiunea Bluetooth s-a realizat cu succes."
                 context?.let { sendConnectionNotification(it, title, content) }
+                val r = 255
+                val g = 0
+                val b = 0
+                val message =
+                    r.toString() + "," + g.toString() + "," + b.toString() + '\n'
+                sendDataToBluetoothDevice(message, requireContext())
                 Toast.makeText(context, "Pairing successful!", Toast.LENGTH_SHORT).show()
             } else {
                 val name = device.name
@@ -202,23 +229,25 @@ class BluetoothFragment : Fragment() {
             val errorMessage = "Pairing failed! Exception: ${e.message}"
             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
             e.printStackTrace()
-            showCopyDialog(errorMessage)
+            showCopyDialog(errorMessage, context)
         }
     }
 
-    private fun showCopyDialog(errorMessage: String) {
-        val clipboard = context?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("Error Message", errorMessage)
-        clipboard.setPrimaryClip(clip)
+    private fun showCopyDialog(errorMessage: String, context: Context?) {
+        context?.let {
+            val clipboard = it.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Error Message", errorMessage)
+            clipboard.setPrimaryClip(clip)
 
-        AlertDialog.Builder(context).setTitle("Error").setMessage(errorMessage)
-            .setPositiveButton("Copy") { dialog, _ ->
-                dialog.dismiss()
-                Toast.makeText(context, "Error message copied to clipboard", Toast.LENGTH_SHORT)
-                    .show()
-            }.setNegativeButton("Dismiss") { dialog, _ ->
-                dialog.dismiss()
-            }.show()
+            AlertDialog.Builder(it).setTitle("Error").setMessage(errorMessage)
+                .setPositiveButton("Copy") { dialog, _ ->
+                    dialog.dismiss()
+                    Toast.makeText(it, "Error message copied to clipboard", Toast.LENGTH_SHORT)
+                        .show()
+                }.setNegativeButton("Dismiss") { dialog, _ ->
+                    dialog.dismiss()
+                }.show()
+        }
     }
 
     private fun startInfinityRefreshScanner(
@@ -288,5 +317,9 @@ class BluetoothFragment : Fragment() {
             notificationManager.createNotificationChannel(channel)
         }
         notificationManager.notify(notificationId, notificationBuilder.build())
+    }
+
+    public fun setRGB(message: ByteArray){
+
     }
 }
