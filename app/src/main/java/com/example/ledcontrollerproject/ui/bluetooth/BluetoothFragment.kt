@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -149,7 +150,7 @@ class BluetoothFragment : Fragment() {
     fun DeviceList(devices: List<BluetoothDevice>) {
         WoofTheme {
             LazyColumn {
-                items(devices.filter { it.name != null }) { device ->
+                items(devices.filter { it.name == "HMSoft"}) { device ->
                     DeviceListItem(device = device) {}
                 }
             }
